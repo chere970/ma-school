@@ -1,3 +1,20 @@
-apps/api/
+# dependencies
 node_modules
+
+# build outputs
+dist
+build
+.next
+out
+
+# tests / coverage
+coverage
+
+# generated / local artifacts
+*.tsbuildinfo
+
+
+# env files
+.env
+.env.*
 
