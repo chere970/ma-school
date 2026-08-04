@@ -3,6 +3,11 @@
 /node_modules
 /build
 
+# assistant / IDE metadata
+.agents/
+.claude/
+.windsurf/
+
 # Logs
 logs
 *.log
