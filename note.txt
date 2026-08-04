@@ -308,3 +308,36 @@ We'll treat this like a production system.
 Since this project will likely become your portfolio centerpiece, I recommend we first design the **complete database schema (Prisma)** for the core entities—Tenant, User, Roles, Faculties, Departments, Programs, Students, Instructors, Courses, Semesters, and Registrations.
 
 Getting the schema right early will make the rest of the implementation much smoother and reduce the need for breaking changes later. After that, we can implement the modules one by one on top of a solid foundation.
+
+One change I'd like to make
+
+I don't want this project to become a collection of unrelated modules. Instead, let's treat it like a real product with clear milestones.
+
+Milestone 1 — Platform Core
+Multi-tenancy
+Configuration
+Prisma
+Authentication
+RBAC
+Audit logging
+Milestone 2 — Academic Core
+Faculties
+Departments
+Programs
+Courses
+Students
+Instructors
+Milestone 3 — Academic Operations
+Registration
+Attendance
+Grades
+GPA
+Transcripts
+Milestone 4 — Enterprise Features
+Finance
+Library
+Notifications
+Reporting
+Analytics
+
+This gives us a clear progression, and after each milestone the application is usable and demonstrable.

@@ -3,8 +3,17 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './common/prisma/prisma.module';
 import { TenantMiddleware } from './tenants/middleware/tenant.middleware';
+import { envValidationSchema } from './config/env.validation';
+import { ConfigModule } from '@nestjs/config/dist/config.module';
+import configuration  from './config/configuration';
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [configuration],
+      validationSchema:envValidationSchema,
+    })
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
