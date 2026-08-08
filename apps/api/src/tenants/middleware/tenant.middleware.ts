@@ -1,29 +1,57 @@
 import {
+  BadRequestException,
   Injectable,
   NestMiddleware,
-  BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
+import { NextFunction, Request, Response } from 'express';
 
-import { NextFunction, Response } from 'express';
-import { TenantRequest } from '../interfaces/tenant-request.interface';
+import { PrismaService } from '../../common/prisma/prisma.service';
 import { TenantContext } from '../../common/tenant/tenant-context.service';
 
 @Injectable()
 export class TenantMiddleware implements NestMiddleware {
   constructor(
+    private readonly prisma: PrismaService,
     private readonly tenantContext: TenantContext,
   ) {}
 
-  use(req: TenantRequest, res: Response, next: NextFunction) {
-    const tenantId = req.headers['x-tenant-id']?.toString();
+  async use(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) {
+    const tenantId = req.headers['x-tenant-id'];
 
     if (!tenantId) {
-      throw new BadRequestException('Tenant not specified');
+      throw new BadRequestException(
+        'x-tenant-id header is required',
+      );
     }
 
-    this.tenantContext.run({ tenantId }, () => {
-      req.tenantId = tenantId;
-      next();
+    const tenantIdString = tenantId.toString();
+
+    const tenant = await this.prisma.tenant.findUnique({
+      where: {
+        id: tenantIdString,
+      },
     });
+
+    if (!tenant) {
+      throw new NotFoundException(
+        'Tenant not found',
+      );
+    }
+
+    if (!tenant.isActive) {
+      throw new BadRequestException(
+        'Tenant is inactive',
+      );
+    }
+
+    this.tenantContext.run(
+      {tenantId:tenant.id},
+      () => next(),
+    );
   }
 }

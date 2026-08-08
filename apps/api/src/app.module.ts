@@ -4,9 +4,9 @@ import { AppService } from './app.service';
 import { PrismaModule } from './common/prisma/prisma.module';
 import { TenantContextModule } from './common/tenant/tenant-context.module';
 import { TenantMiddleware } from './tenants/middleware/tenant.middleware';
-import { envValidationSchema } from './config/env.validation';
-import { ConfigModule } from '@nestjs/config/dist/config.module';
-import configuration  from './config/configuration';
+// import { envValidationSchema } from './config/env.validation';
+// import { ConfigModule } from '@nestjs/config/dist/config.module';
+// import configuration  from './config/configuration';
 import { AppConfigModule } from './config/config.module';
 @Module({
   // imports: [PrismaModule,
@@ -17,7 +17,7 @@ import { AppConfigModule } from './config/config.module';
   //     validationSchema:envValidationSchema,
   //   })
   // ],
-  imports:[AppConfigModule],
+  imports:[AppConfigModule,TenantContextModule,PrismaModule],
   controllers: [AppController],
   providers: [AppService],
 })
