@@ -51,7 +51,12 @@ export class TenantMiddleware implements NestMiddleware {
 
     this.tenantContext.run(
       {tenantId:tenant.id},
-      () => next(),
+      () =>{ 
+    (req as Request & { tenantId: string }).tenantId =
+      tenant.id;
+
+    next(); 
+      }
     );
   }
 }
