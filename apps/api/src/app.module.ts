@@ -8,6 +8,7 @@ import { TenantMiddleware } from './tenants/middleware/tenant.middleware';
 // import { ConfigModule } from '@nestjs/config/dist/config.module';
 // import configuration  from './config/configuration';
 import { AppConfigModule } from './config/config.module';
+import { TenantModule } from './tenants/tenant.module';
 @Module({
   // imports: [PrismaModule,
   //   TenantContextModule,
@@ -17,7 +18,7 @@ import { AppConfigModule } from './config/config.module';
   //     validationSchema:envValidationSchema,
   //   })
   // ],
-  imports:[AppConfigModule,TenantContextModule,PrismaModule],
+  imports:[AppConfigModule,TenantContextModule,PrismaModule,TenantModule],
   controllers: [AppController],
   providers: [AppService],
 })
