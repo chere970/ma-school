@@ -7,15 +7,17 @@ import { TenantMiddleware } from './tenants/middleware/tenant.middleware';
 import { envValidationSchema } from './config/env.validation';
 import { ConfigModule } from '@nestjs/config/dist/config.module';
 import configuration  from './config/configuration';
+import { AppConfigModule } from './config/config.module';
 @Module({
-  imports: [PrismaModule,
-    TenantContextModule,
-    ConfigModule.forRoot({
-      isGlobal: true,
-      load: [configuration],
-      validationSchema:envValidationSchema,
-    })
-  ],
+  // imports: [PrismaModule,
+  //   TenantContextModule,
+  //   ConfigModule.forRoot({
+  //     isGlobal: true,
+  //     load: [configuration],
+  //     validationSchema:envValidationSchema,
+  //   })
+  // ],
+  imports:[AppConfigModule],
   controllers: [AppController],
   providers: [AppService],
 })
