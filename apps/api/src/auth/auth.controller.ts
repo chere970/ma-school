@@ -9,21 +9,26 @@ export class AuthController{
     @Post("login")
     async login(@Body() loginDto: LoginDto){
 
-         const user= await this.authService.validateUser(
+        //  const user= await this.authService.validateUser(
+        //     loginDto.email,
+        //     loginDto.password
+        //  );
+         return this.authService.login(
             loginDto.email,
             loginDto.password
          );
-         return {
-            message: 'login successful',
-            user:{
-                id:user.id,
-                firstName:user.firstName,
-                lastName:user.lastName,
-                email:user.email,
-                tenantId:user.tenantId,
-                role:user.role.name
-            }
-         }
+    }
+        //  {
+        //     message: 'login successful',
+        //     user:{
+        //         id:user.id,
+        //         firstName:user.firstName,
+        //         lastName:user.lastName,
+        //         email:user.email,
+        //         tenantId:user.tenantId,
+        //         role:user.role.name
+        //     }
+
+        //  }
     }
 
-}

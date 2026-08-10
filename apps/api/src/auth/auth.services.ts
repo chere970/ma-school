@@ -2,12 +2,14 @@ import { Injectable, UnauthorizedException } from "@nestjs/common";
 import {PrismaService} from "../common/prisma/prisma.service"; 
 import * as bcrypt from 'bcrypt';
 import { TenantContext } from "../common/tenant/tenant-context.service";
+import { JwtService } from "@nestjs/jwt/dist/jwt.service";
 
 @Injectable()
 export class AuthService{
  constructor(
     private readonly prisma: PrismaService,
     private readonly tenantContext: TenantContext,
+    private readonly jwtService: JwtService
  ) {}
 
 
@@ -41,5 +43,29 @@ export class AuthService{
         );
     }
     return user;
+ }
+ async login(
+    email:string,
+    password:string
+ ){
+    const user= await this.validateUser(email, password);
+    const payload={
+        sub: user.id,
+        tenantId: user.tenantId,
+        role: user.role.name,
+    };
+    const accessToken= this.jwtService.sign(payload);
+    return {
+        accessToken,
+        user:{
+            id:user.id,
+            firstName:user.firstName,
+            lastName:user.lastName,
+            email:user.email,
+            tenantId:user.tenantId,
+            role:user.role.name
+
+        }
+    }
  }
 }
