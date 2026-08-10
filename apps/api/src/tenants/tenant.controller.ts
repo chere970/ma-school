@@ -1,4 +1,4 @@
-import { Controller,Get } from "@nestjs/common";
+import { Controller,Get, UseGuards } from "@nestjs/common";
 import { TenantService } from "./tenant.service";
 import { CurrentTenant } from "./decorators/current-tenant.decorator";
 @Controller('tenants')
@@ -19,4 +19,12 @@ export class TenantController {
         }
         
     }
+    @UseGuards(JwtAuthGuard)
+    @Get('protected')
+    async getProtected() {
+        return "Your are authenticated"
+    }
+    
+
+
 }
