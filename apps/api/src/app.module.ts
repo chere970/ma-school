@@ -9,6 +9,7 @@ import { TenantMiddleware } from './tenants/middleware/tenant.middleware';
 // import configuration  from './config/configuration';
 import { AppConfigModule } from './config/config.module';
 import { TenantModule } from './tenants/tenant.module';
+import { AuthModule } from './auth/auth.module';
 @Module({
   // imports: [PrismaModule,
   //   TenantContextModule,
@@ -18,7 +19,7 @@ import { TenantModule } from './tenants/tenant.module';
   //     validationSchema:envValidationSchema,
   //   })
   // ],
-  imports:[AppConfigModule,TenantContextModule,PrismaModule,TenantModule],
+  imports:[AppConfigModule,TenantContextModule,PrismaModule,TenantModule,AuthModule],
   controllers: [AppController],
   providers: [AppService],
 })
