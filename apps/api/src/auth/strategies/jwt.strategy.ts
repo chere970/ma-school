@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { TenantContext } from '../../common/tenant/tenant-context.service';
-
+import { AuthenticatedUser } from '../interfaces/authenticated-user.interface';
 export interface JwtPayload {
   sub: string;
   tenantId: string;
@@ -32,7 +32,7 @@ export class JwtStrategy extends PassportStrategy(
     });
   }
 
-  async validate(payload: JwtPayload) {
+  async validate(payload: JwtPayload): Promise<AuthenticatedUser> {
     return {
       userId: payload.sub,
       tenantId: payload.tenantId,
