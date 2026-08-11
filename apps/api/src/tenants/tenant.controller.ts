@@ -1,6 +1,7 @@
 import { Controller,Get, UseGuards } from "@nestjs/common";
 import { TenantService } from "./tenant.service";
 import { CurrentTenant } from "./decorators/current-tenant.decorator";
+import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 @Controller('tenants')
 export class TenantController {
     constructor(private readonly tenantService: TenantService,

@@ -1,13 +1,18 @@
 import {
-  BadRequestException,
   Injectable,
   NestMiddleware,
   NotFoundException,
 } from '@nestjs/common';
-import { NextFunction, Request, Response } from 'express';
+
+import {
+  NextFunction,
+  Response,
+  Request
+} from 'express';
 
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { TenantContext } from '../../common/tenant/tenant-context.service';
+import { TenantRequest } from '../interfaces/tenant-request.interface';
 
 @Injectable()
 export class TenantMiddleware implements NestMiddleware {
@@ -17,37 +22,39 @@ export class TenantMiddleware implements NestMiddleware {
   ) {}
 
   async use(
-    req: Request,
+    req: TenantRequest,
     res: Response,
     next: NextFunction,
   ) {
     const tenantId = req.headers['x-tenant-id'];
 
-    if (!tenantId) {
-      throw new BadRequestException(
-        'x-tenant-id header is required',
-      );
-    }
+    // Tenant header is optional.
+    //
+    // If it exists, validate it and establish
+    // the tenant context.
+    if (tenantId) {
+      const tenantIdString = tenantId.toString();
 
-    const tenantIdString = tenantId.toString();
+      const tenant =
+        await this.prisma.tenant.findUnique({
+          where: {
+            id: tenantIdString,
+          },
+        });
 
-    const tenant = await this.prisma.tenant.findUnique({
-      where: {
-        id: tenantIdString,
-      },
-    });
+      if (!tenant) {
+        throw new NotFoundException(
+          'Tenant not found',
+        );
+      }
 
-    if (!tenant) {
-      throw new NotFoundException(
-        'Tenant not found',
-      );
-    }
+      if (!tenant.isActive) {
+        throw new NotFoundException(
+          'Tenant is inactive',
+        );
+      }
 
-    if (!tenant.isActive) {
-      throw new BadRequestException(
-        'Tenant is inactive',
-      );
-    }
+      req.tenantId = tenant.id;
 
     this.tenantContext.run(
       {tenantId:tenant.id},
@@ -59,4 +66,4 @@ export class TenantMiddleware implements NestMiddleware {
       }
     );
   }
-}
+}}

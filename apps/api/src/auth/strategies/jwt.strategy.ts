@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { TenantContext } from '../../common/tenant/tenant-context.service';
 
 export interface JwtPayload {
   sub: string;
@@ -16,6 +17,7 @@ export class JwtStrategy extends PassportStrategy(
 ) {
   constructor(
     private readonly configService: ConfigService,
+    private readonly tenantContext: TenantContext,
   ) {
     super({
       jwtFromRequest:
