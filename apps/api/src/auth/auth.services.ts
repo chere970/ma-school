@@ -333,8 +333,59 @@ export class AuthService {
 
     const accessToken = await this.jwtService.signAsync(accessPayload);
 
-    return {
-      accessToken,
-    };
+    const newRefreshToken =
+    await this.generateRefreshToken(
+      user.id,
+      user.tenantId,
+      user.role.name,
+    );
+    /*
+   * Hash the NEW refresh token.
+   */
+  const newRefreshTokenHash =
+    await bcrypt.hash(
+      newRefreshToken,
+      12,
+    );
+    /*
+   * Replace the old refresh-token hash.
+   *
+   * The previous refresh token is now invalid.
+   */
+  await this.prisma.user.update({
+    where: {
+      id: user.id,
+    },
+
+    data: {
+      refreshTokenHash:
+        newRefreshTokenHash,
+    },
+  });
+
+  return {
+    accessToken,
+    refreshToken: newRefreshToken,
+  };
+
+    
+    
   }
+  async logout(
+  userId: string,
+) {
+  await this.prisma.user.update({
+    where: {
+      id: userId,
+    },
+
+    data: {
+      refreshTokenHash: null,
+    },
+  });
+
+  return {
+    message: 'Logged out successfully',
+  };
+}
 }
