@@ -27,6 +27,7 @@ model User {
 
   email        String
   passwordHash String
+  refreshTokenHash String?
 
   isActive     Boolean @default(true)
 
