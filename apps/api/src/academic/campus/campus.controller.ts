@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  Param,
+  Patch,
   Post,
   UseGuards,
   UseInterceptors,
@@ -12,7 +14,7 @@ import { TenantContextInterceptor } from '../../common/tenant/tenant-context.int
 
 import { CampusService } from './campus.service';
 import { CreateCampusDto } from './dto/create-campus.dto';
-
+import { UpdateCampusDto} from './dto/update-campus.dto'
 @Controller('campuses')
 @UseGuards(JwtAuthGuard)
 @UseInterceptors(TenantContextInterceptor)
@@ -31,5 +33,13 @@ export class CampusController {
   @Get()
   async findAll() {
     return this.campusService.findAll();
+  }
+  @Get(':id')
+  async findOne(@Param('id') id:string,){
+      return this.campusService.findOne(id)
+    }
+  @Patch(':id')
+  async update(@Param('id') id: string,@Body() dto:UpdateCampusDto){
+    return this.campusService.update(id,dto);
   }
 }

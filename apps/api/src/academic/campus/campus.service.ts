@@ -8,7 +8,7 @@ import { PrismaService } from '../../common/prisma/prisma.service';
 import { TenantContext } from '../../common/tenant/tenant-context.service';
 
 import { CreateCampusDto } from './dto/create-campus.dto';
-
+import {UpdateCampusDto} from './dto/update-campus.dto'
 @Injectable()
 export class CampusService {
   constructor(
@@ -88,7 +88,7 @@ export class CampusService {
   }
   async update(
     id:string,
-    dto:CreateCampusDto
+    dto:UpdateCampusDto
   ){
     const tenantId= await this.getTenantId()
     const campus= await this.prisma.campus.findFirst({
