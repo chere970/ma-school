@@ -1,35 +1,35 @@
 import {
   IsInt,
-  IsNotEmpty,
   IsOptional,
   IsString,
   Min,
 } from 'class-validator';
 
-export class CreateCourseDto {
+export class UpdateCourseDto {
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  departmentId: string;
+  departmentId?: string;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  programId: string;
+  programId?: string;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  code: string;
+  code?: string;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  name: string;
+  name?: string;
 
   @IsOptional()
   @IsString()
   description?: string;
 
+  @IsOptional()
   @IsInt()
   @Min(1)
-  creditHours: number;
+  creditHours?: number;
 
   @IsOptional()
   @IsInt()

@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Course" ALTER COLUMN "semester" DROP NOT NULL,
+ALTER COLUMN "yearLevel" DROP NOT NULL;

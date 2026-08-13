@@ -177,13 +177,14 @@ model Course {
   description String?
 
   creditHours Int
-  semester    Int
-  yearLevel    Int
+  semester    Int?
+  yearLevel   Int?
 
   isActive Boolean @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   @@unique([tenantId, code])
   @@unique([tenantId, name])
 }
