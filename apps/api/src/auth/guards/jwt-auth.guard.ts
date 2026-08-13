@@ -1,28 +1,20 @@
 import {
   ExecutionContext,
+  ForbiddenException,
   Injectable,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Observable, lastValueFrom } from 'rxjs';
-import { TenantContext } from '../../common/tenant/tenant-context.service';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
-  constructor(
-    private readonly tenantContext: TenantContext,
-  ) {
-    super();
-  }
-
   async canActivate(
     context: ExecutionContext,
   ): Promise<boolean> {
     try {
-      // Resolve the parent canActivate result regardless of whether
-      // it returns a boolean, Promise<boolean>, or Observable<boolean>
       const result = super.canActivate(context);
-      const authenticated = result instanceof Observable 
-        ? await lastValueFrom(result) 
+      const authenticated = result instanceof Observable
+        ? await lastValueFrom(result)
         : await result;
 
       if (!authenticated) {
@@ -36,10 +28,25 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         return false;
       }
 
+      const headerTenantId = request.headers?.['x-tenant-id'];
+      const clientTenantId = Array.isArray(headerTenantId)
+        ? headerTenantId[0]
+        : headerTenantId?.toString();
+
+      if (clientTenantId && clientTenantId !== user.tenantId) {
+        throw new ForbiddenException(
+          'x-tenant-id does not match the authenticated JWT tenant',
+        );
+      }
+
       request.tenantId = user.tenantId;
 
       return true;
-    } catch {
+    } catch (error) {
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
+
       return false;
     }
   }

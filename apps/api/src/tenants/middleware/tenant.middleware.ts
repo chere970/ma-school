@@ -3,11 +3,10 @@ import {
   NestMiddleware,
   NotFoundException,
 } from '@nestjs/common';
-
 import {
   NextFunction,
+  Request,
   Response,
-  Request
 } from 'express';
 
 import { PrismaService } from '../../common/prisma/prisma.service';
@@ -26,44 +25,36 @@ export class TenantMiddleware implements NestMiddleware {
     res: Response,
     next: NextFunction,
   ) {
-    const tenantId = req.headers['x-tenant-id'];
+    const headerTenantId = req.headers['x-tenant-id'];
 
-    // Tenant header is optional.
-    //
-    // If it exists, validate it and establish
-    // the tenant context.
-    if (tenantId) {
-      const tenantIdString = tenantId.toString();
+    if (!headerTenantId) {
+      return next();
+    }
 
-      const tenant =
-        await this.prisma.tenant.findUnique({
-          where: {
-            id: tenantIdString,
-          },
-        });
+    const tenantIdString = headerTenantId.toString();
 
-      if (!tenant) {
-        throw new NotFoundException(
-          'Tenant not found',
-        );
-      }
+    const tenant = await this.prisma.tenant.findUnique({
+      where: {
+        id: tenantIdString,
+      },
+    });
 
-      if (!tenant.isActive) {
-        throw new NotFoundException(
-          'Tenant is inactive',
-        );
-      }
+    if (!tenant) {
+      throw new NotFoundException('Tenant not found');
+    }
 
-      req.tenantId = tenant.id;
+    if (!tenant.isActive) {
+      throw new NotFoundException('Tenant is inactive');
+    }
 
-    this.tenantContext.run(
-      {tenantId:tenant.id},
-      () =>{ 
-    (req as Request & { tenantId: string }).tenantId =
-      tenant.id;
+    req.tenantId = tenant.id;
 
-    next(); 
-      }
+    return this.tenantContext.run(
+      { tenantId: tenant.id },
+      () => {
+        (req as Request & { tenantId: string }).tenantId = tenant.id;
+        next();
+      },
     );
   }
-}}
+}

@@ -11,8 +11,8 @@ type Store = {
 export class TenantContext {
   private readonly storage = new AsyncLocalStorage<Store>();
 
-  run(store: Store, callback: () => void) {
-    this.storage.run(store, callback);
+  run<T>(store: Store, callback: () => T): T {
+    return this.storage.run(store, callback);
   }
 
   getTenantId(): string {

@@ -1,9 +1,9 @@
-import { Controller,Get, UseGuards } from "@nestjs/common";
+import { Controller, Get, UseGuards, UseInterceptors } from "@nestjs/common";
 import { TenantService } from "./tenant.service";
 import { CurrentTenant } from "./decorators/current-tenant.decorator";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
-// import { AuthenticatedUser } from "../auth/interfaces/authenticated-user.interface";
+import { TenantContextInterceptor } from "../common/tenant/tenant-context.interceptor";
 import * as AuthInterfaces from "../auth/interfaces/authenticated-user.interface";
 @Controller('tenants')
 export class TenantController {
@@ -24,6 +24,7 @@ export class TenantController {
         
     }
     @UseGuards(JwtAuthGuard)
+    @UseInterceptors(TenantContextInterceptor)
     @Get('protected')
     async getProtected(@CurrentUser() user: AuthInterfaces.AuthenticatedUser) {
         return {
