@@ -20,7 +20,7 @@ export class CreateProgramDto {
  @IsOptional()
  @IsNumber()
  @Min(1)
- durationMonths?:number;
+ durationYears?:number;
 
  @IsOptional()
  @IsString()
