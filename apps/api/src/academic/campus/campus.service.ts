@@ -1,6 +1,7 @@
 import {
   ConflictException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 
 import { PrismaService } from '../../common/prisma/prisma.service';
@@ -15,11 +16,14 @@ export class CampusService {
     private readonly tenantContext: TenantContext,
   ) {}
 
+  private getTenantId(): string{
+    return this.tenantContext.getTenantId();
+  }
   async create(
     dto: CreateCampusDto,
   ) {
     const tenantId =
-      this.tenantContext.getTenantId();
+      this.getTenantId();
 
     const existing =
       await this.prisma.campus.findFirst({
@@ -55,7 +59,7 @@ export class CampusService {
 
   async findAll() {
     const tenantId =
-      this.tenantContext.getTenantId();
+      this.getTenantId();
 
     return this.prisma.campus.findMany({
       where: {
@@ -66,5 +70,84 @@ export class CampusService {
         name: 'asc',
       },
     });
+  }
+  async findOne(id:string){
+    const tenantId= await this.getTenantId();
+  const campus=  await this.prisma.campus.findFirst(
+    {
+      where: {
+        id,
+        tenantId
+      }
+    }
+    );
+    if(!campus){
+      throw new NotFoundException('campus not found')
+    }
+    return campus;
+  }
+  async update(
+    id:string,
+    dto:CreateCampusDto
+  ){
+    const tenantId= await this.getTenantId()
+    const campus= await this.prisma.campus.findFirst({
+      where:{
+        id,
+        tenantId,
+      },
+    });
+    if(!campus)
+    {
+      throw new NotFoundException('Campus not found')
+    }
+    const duplicate= await this.prisma.campus.findFirst({
+      where:{
+        tenantId,
+        OR:[
+          {name:dto.name},
+          {code:dto.code}
+        ],
+        NOT:{
+          id,
+        }
+      }
+    });
+    if(duplicate){
+      throw new ConflictException('Campus name or code already exist',);
+    }
+    return await this.prisma.campus.update({
+      where:{
+        id,
+      },
+      data:{
+        name:dto.name,
+        code:dto.code,
+        address:dto.address
+      }
+    })
+
+  }
+
+  async remove(
+    id:string
+  ){
+    const tenantId= await this.getTenantId();
+    const campus=await this.prisma.campus.findFirst({
+      where:{
+        id,
+        tenantId
+      }
+
+    })
+    if(!campus){
+      throw new NotFoundException('Campus not found')
+    }
+    await this.prisma.campus.delete({
+      where:{
+        id,
+      }
+    });
+    return "Campus deleted successfully!";
   }
 }
