@@ -147,6 +147,7 @@ model Program {
   code          String
   degree        String?
   durationYears Int?
+  description   String?
 
   isActive Boolean @default(true)
 
