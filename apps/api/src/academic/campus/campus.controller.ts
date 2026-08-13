@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -41,5 +42,9 @@ export class CampusController {
   @Patch(':id')
   async update(@Param('id') id: string,@Body() dto:UpdateCampusDto){
     return this.campusService.update(id,dto);
+  }
+  @Delete(':id')
+  async remove(@Param('id')id: string){
+    return this.campusService.remove(id);
   }
 }
