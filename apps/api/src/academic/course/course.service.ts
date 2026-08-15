@@ -277,7 +277,7 @@ export class CourseService {
 
     await this.prisma.course.delete({
       where: {
-        id,
+        id:course.id,
       },
     });
 

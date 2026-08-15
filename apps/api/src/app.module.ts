@@ -1,29 +1,37 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { PrismaModule } from './common/prisma/prisma.module';
-import { TenantContextModule } from './common/tenant/tenant-context.module';
-import { TenantContextInterceptor } from './common/tenant/tenant-context.interceptor';
-import { TenantMiddleware } from './tenants/middleware/tenant.middleware';
-import { AppConfigModule } from './config/config.module';
-import { TenantModule } from './tenants/tenant.module';
-import { AuthModule } from './auth/auth.module';
-import { AcademicModule } from './academic/academic.module';
+import { Module } from '@nestjs/common';
+
+import { CampusController } from './academic/campus/campus.controller';
+import { CampusService } from './academic/campus/campus.service';
+
+import { DepartmentController } from './academic/department/department.controller';
+import { DepartmentService } from './academic/department/department.service';
+
+import { ProgramController } from './academic/program/program.controller';
+import { ProgramService } from './academic/program/program.service';
+
+import { CourseController } from './academic/course/course.controller';
+import { CourseService } from './academic/course/course.service';
 
 @Module({
-  imports: [
-    AppConfigModule,
-    TenantContextModule,
-    PrismaModule,
-    TenantModule,
-    AuthModule,
-    AcademicModule,
+  controllers: [
+    CampusController,
+    DepartmentController,
+    ProgramController,
+    CourseController,
   ],
-  controllers: [AppController],
-  providers: [AppService, TenantContextInterceptor],
+
+  providers: [
+    CampusService,
+    DepartmentService,
+    ProgramService,
+    CourseService,
+  ],
+
+  exports: [
+    CampusService,
+    DepartmentService,
+    ProgramService,
+    CourseService,
+  ],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(TenantMiddleware).forRoutes('*');
-  }
-}
+export class AcademicModule {}
