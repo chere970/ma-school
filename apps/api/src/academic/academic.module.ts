@@ -11,6 +11,8 @@ import { ProgramService } from './program/program.service';
 
 import { CourseController } from './course/course.controller';
 import { CourseService } from './course/course.service';
+import { StudentController } from './student/student.controller';
+import { StudentService } from './student/student.service';
 
 @Module({
   controllers: [
@@ -18,6 +20,7 @@ import { CourseService } from './course/course.service';
     DepartmentController,
     ProgramController,
     CourseController,
+    StudentController,
   ],
 
   providers: [
@@ -25,6 +28,7 @@ import { CourseService } from './course/course.service';
     DepartmentService,
     ProgramService,
     CourseService,
+    StudentService, 
   ],
 
   exports: [
@@ -32,6 +36,7 @@ import { CourseService } from './course/course.service';
     DepartmentService,
     ProgramService,
     CourseService,
+    StudentService,
   ],
 })
 export class AcademicModule {}
