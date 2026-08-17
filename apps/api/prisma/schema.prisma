@@ -81,6 +81,7 @@ model Tenant {
   students    Student[]
   teachers    Teacher[]
   enorllments Enrollment[]
+  teachingAssignments TeachingAssignment[]
 }
 
 model Permission {
@@ -190,6 +191,7 @@ model Course {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   enrollments Enrollment[]
+  teachingAssignments TeachingAssignment[]
 
   @@unique([tenantId, code])
   @@unique([tenantId, name])
@@ -259,6 +261,7 @@ model Teacher {
 
   @@unique([tenantId, employeeNumber])
   @@unique([tenantId, email])
+  teachingAssignments TeachingAssignment[]
 }
 
 model Enrollment {
@@ -291,4 +294,28 @@ enum EnrollmentStatus {
   COMPLETED
   DROPPED
   WITHDRAWN
+}
+model TeachingAssignment {
+  id String @id @default(uuid())
+
+  tenantId String
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  teacherId String
+  teacher Teacher @relation(fields: [teacherId], references: [id])
+
+  courseId String
+  course Course @relation(fields: [courseId], references: [id])
+
+  assignedAt DateTime @default(now())
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, teacherId, courseId])
+  @@index([tenantId])
+  @@index([teacherId])
+  @@index([courseId])
 }
