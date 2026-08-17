@@ -80,6 +80,7 @@ model Tenant {
   courses     Course[]
   students    Student[]
   teachers    Teacher[]
+  enorllments Enrollment[]
 }
 
 model Permission {
@@ -186,8 +187,9 @@ model Course {
 
   isActive Boolean @default(true)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  enrollments Enrollment[]
 
   @@unique([tenantId, code])
   @@unique([tenantId, name])
@@ -223,6 +225,8 @@ model Student {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  studentEnrollments Enrollment[]
+
   @@unique([tenantId, studentNumber])
   @@unique([tenantId, email])
 }
@@ -255,4 +259,36 @@ model Teacher {
 
   @@unique([tenantId, employeeNumber])
   @@unique([tenantId, email])
+}
+
+model Enrollment {
+  id String @id @default(uuid())
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id])
+
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id])
+
+  enrollmentDate DateTime @default(now())
+
+  status EnrollmentStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, studentId, courseId])
+  @@index([tenantId])
+  @@index([studentId])
+  @@index([courseId])
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  DROPPED
+  WITHDRAWN
 }
