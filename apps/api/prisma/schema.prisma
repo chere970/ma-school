@@ -79,6 +79,7 @@ model Tenant {
   programs    Program[]
   courses     Course[]
   students    Student[]
+  teachers    Teacher[]
 }
 
 model Permission {
@@ -130,6 +131,7 @@ model Department {
 
   programs Program[]
   courses  Course[]
+  teachers Teacher[]
 
   @@unique([tenantId, code])
   @@unique([tenantId, name])
@@ -222,5 +224,35 @@ model Student {
   updatedAt DateTime @updatedAt
 
   @@unique([tenantId, studentNumber])
+  @@unique([tenantId, email])
+}
+
+model Teacher {
+  id String @id @default(uuid())
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  employeeNumber String
+
+  firstName  String
+  middleName String?
+  lastName   String
+
+  email String?
+  phone String?
+
+  specialization String?
+  hireDate       DateTime?
+
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id])
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, employeeNumber])
   @@unique([tenantId, email])
 }
