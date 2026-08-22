@@ -21,6 +21,9 @@ import { TeachingAssignmentController } from './teaching-assignment/teaching-ass
 import { TeachingAssignmentService } from './teaching-assignment/teaching-assignment.service';
 import { RoomService } from './room/room.service';
 import { RoomController } from './room/room.controller';
+import { TimetableController } from './timetable/timetable.controller';
+import { TimetableScalarFieldEnum } from '../../generated/prisma/internal/prismaNamespace';
+import { TimetableService } from './timetable/timetable.service';
 
 @Module({
   controllers: [
@@ -33,6 +36,7 @@ import { RoomController } from './room/room.controller';
     EnrollmentController,
     TeachingAssignmentController,
     RoomController,
+    TimetableController
   ],
 
   providers: [
@@ -44,7 +48,8 @@ import { RoomController } from './room/room.controller';
     TeacherService,
     EnrollmentService,
     TeachingAssignmentService,
-    RoomService
+    RoomService,
+    TimetableService
   ],
 
   exports: [
@@ -57,6 +62,7 @@ import { RoomController } from './room/room.controller';
     EnrollmentService,
     TeachingAssignmentService,
     RoomService,
+    TimetableService
   ],
 })
 export class AcademicModule {}
