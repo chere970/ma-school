@@ -73,15 +73,16 @@ model Tenant {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  users       User[]
-  campuses    Campus[]
-  departments Department[]
-  programs    Program[]
-  courses     Course[]
-  students    Student[]
-  teachers    Teacher[]
-  enorllments Enrollment[]
+  users               User[]
+  campuses            Campus[]
+  departments         Department[]
+  programs            Program[]
+  courses             Course[]
+  students            Student[]
+  teachers            Teacher[]
+  enorllments         Enrollment[]
   teachingAssignments TeachingAssignment[]
+  rooms               Room[]
 }
 
 model Permission {
@@ -108,6 +109,7 @@ model Campus {
   updatedAt DateTime @updatedAt
 
   departments Department[]
+  rooms       Room[]
 
   @@unique([tenantId, code])
   @@unique([tenantId, name])
@@ -188,9 +190,9 @@ model Course {
 
   isActive Boolean @default(true)
 
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  enrollments Enrollment[]
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  enrollments         Enrollment[]
   teachingAssignments TeachingAssignment[]
 
   @@unique([tenantId, code])
@@ -256,12 +258,12 @@ model Teacher {
 
   isActive Boolean @default(true)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  teachingAssignments TeachingAssignment[]
 
   @@unique([tenantId, employeeNumber])
   @@unique([tenantId, email])
-  teachingAssignments TeachingAssignment[]
 }
 
 model Enrollment {
@@ -295,17 +297,18 @@ enum EnrollmentStatus {
   DROPPED
   WITHDRAWN
 }
+
 model TeachingAssignment {
   id String @id @default(uuid())
 
   tenantId String
-  tenant Tenant @relation(fields: [tenantId], references: [id])
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
 
   teacherId String
-  teacher Teacher @relation(fields: [teacherId], references: [id])
+  teacher   Teacher @relation(fields: [teacherId], references: [id])
 
   courseId String
-  course Course @relation(fields: [courseId], references: [id])
+  course   Course @relation(fields: [courseId], references: [id])
 
   assignedAt DateTime @default(now())
 
@@ -318,4 +321,30 @@ model TeachingAssignment {
   @@index([tenantId])
   @@index([teacherId])
   @@index([courseId])
+}
+
+model Room {
+  id String @id @default(uuid())
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  campusId String
+  campus   Campus @relation(fields: [campusId], references: [id])
+
+  name String
+  code String
+
+  capacity Int
+
+  type String?
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@index([campusId])
 }

@@ -17,6 +17,8 @@ import { TeacherController } from './teacher/teacher.controller';
 import { TeacherService } from './teacher/teacher.service';
 import { EnrollmentController } from './enrollment/enrollment.controller';
 import { EnrollmentService } from './enrollment/enrollment.service';
+import { TeachingAssignmentController } from './teaching-assignment/teaching-assignment.controller';
+import { TeachingAssignmentService } from './teaching-assignment/teaching-assignment.service';
 
 @Module({
   controllers: [
@@ -27,6 +29,7 @@ import { EnrollmentService } from './enrollment/enrollment.service';
     StudentController,
     TeacherController,
     EnrollmentController,
+    TeachingAssignmentController,
   ],
 
   providers: [
@@ -37,6 +40,7 @@ import { EnrollmentService } from './enrollment/enrollment.service';
     StudentService, 
     TeacherService,
     EnrollmentService,
+    TeachingAssignmentService,
   ],
 
   exports: [
@@ -47,6 +51,7 @@ import { EnrollmentService } from './enrollment/enrollment.service';
     StudentService,
     TeacherService,
     EnrollmentService,
+    TeachingAssignmentService,
   ],
 })
 export class AcademicModule {}
