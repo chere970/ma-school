@@ -83,6 +83,7 @@ model Tenant {
   enorllments         Enrollment[]
   teachingAssignments TeachingAssignment[]
   rooms               Room[]
+  timetables          Timetable[]
 }
 
 model Permission {
@@ -314,8 +315,9 @@ model TeachingAssignment {
 
   isActive Boolean @default(true)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  timetables Timetable[]
 
   @@unique([tenantId, teacherId, courseId])
   @@index([tenantId])
@@ -341,10 +343,40 @@ model Room {
 
   isActive Boolean @default(true)
 
+  timetables Timetable[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([tenantId, code])
   @@index([tenantId])
   @@index([campusId])
+}
+
+model Timetable {
+  id String @id @default(uuid())
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  teachingAssignmentId String
+  teachingAssignment   TeachingAssignment @relation(fields: [teachingAssignmentId], references: [id])
+
+  roomId String
+  room   Room   @relation(fields: [roomId], references: [id])
+
+  dayOfWeek Int
+
+  startTime String
+  endTime   String
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([teachingAssignmentId])
+  @@index([roomId])
+  @@index([tenantId, dayOfWeek])
 }
