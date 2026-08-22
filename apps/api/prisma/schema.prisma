@@ -84,6 +84,7 @@ model Tenant {
   teachingAssignments TeachingAssignment[]
   rooms               Room[]
   timetables          Timetable[]
+  attendance Attendance[]
 }
 
 model Permission {
@@ -231,6 +232,7 @@ model Student {
   updatedAt DateTime @updatedAt
 
   studentEnrollments Enrollment[]
+  attendances        Attendance[]
 
   @@unique([tenantId, studentNumber])
   @@unique([tenantId, email])
@@ -318,6 +320,7 @@ model TeachingAssignment {
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
   timetables Timetable[]
+  attendances Attendance[]
 
   @@unique([tenantId, teacherId, courseId])
   @@index([tenantId])
@@ -379,4 +382,39 @@ model Timetable {
   @@index([teachingAssignmentId])
   @@index([roomId])
   @@index([tenantId, dayOfWeek])
+}
+model Attendance {
+  id String @id @default(uuid())
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id])
+
+  teachingAssignmentId String
+  teachingAssignment   TeachingAssignment @relation( fields: [teachingAssignmentId],references: [id])
+
+  date DateTime
+
+  status AttendanceStatus @default(PRESENT)
+
+  remarks String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId,studentId,teachingAssignmentId,date])
+
+  @@index([tenantId])
+  @@index([studentId])
+  @@index([teachingAssignmentId])
+  @@index([tenantId, date])
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
 }
