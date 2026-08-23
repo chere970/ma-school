@@ -84,7 +84,9 @@ model Tenant {
   teachingAssignments TeachingAssignment[]
   rooms               Room[]
   timetables          Timetable[]
-  attendance Attendance[]
+  attendance          Attendance[]
+  assessments         Assessment[]
+  grades              Grade[]
 }
 
 model Permission {
@@ -288,6 +290,8 @@ model Enrollment {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  grades Grade[]
+
   @@unique([tenantId, studentId, courseId])
   @@index([tenantId])
   @@index([studentId])
@@ -317,10 +321,11 @@ model TeachingAssignment {
 
   isActive Boolean @default(true)
 
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-  timetables Timetable[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  timetables  Timetable[]
   attendances Attendance[]
+  assessments Assessment[]
 
   @@unique([tenantId, teacherId, courseId])
   @@index([tenantId])
@@ -417,4 +422,75 @@ enum AttendanceStatus {
   ABSENT
   LATE
   EXCUSED
+}
+
+enum AssessmentType {
+  QUIZ
+  ASSIGNMENT
+  MIDTERM
+  FINAL
+  PROJECT
+  PRACTICAL
+  CONTINUOUS_ASSESSMENT
+}
+
+enum GradeStatus {
+  DRAFT
+  PUBLISHED
+  FINALIZED
+}
+
+model Assessment {
+  id       String @id @default(uuid())
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  teachingAssignmentId String
+  teachingAssignment   TeachingAssignment @relation(fields: [teachingAssignmentId], references: [id])
+
+  title          String
+  description    String?
+  type           AssessmentType
+  maxScore       Float
+  weight         Float
+  assessmentDate DateTime?
+  isActive       Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  grades Grade[]
+
+  @@unique([tenantId, teachingAssignmentId, title])
+  @@index([tenantId])
+  @@index([teachingAssignmentId])
+  @@index([tenantId, type])
+  @@index([tenantId, isActive])
+}
+
+model Grade {
+  id       String @id @default(uuid())
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  assessmentId String
+  assessment   Assessment @relation(fields: [assessmentId], references: [id])
+
+  enrollmentId String
+  enrollment   Enrollment @relation(fields: [enrollmentId], references: [id])
+
+  score   Float
+  remarks String?
+  status  GradeStatus @default(DRAFT)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, assessmentId, enrollmentId])
+  @@index([tenantId])
+  @@index([assessmentId])
+  @@index([enrollmentId])
+  @@index([tenantId, status])
 }

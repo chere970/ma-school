@@ -26,6 +26,10 @@ import { TimetableScalarFieldEnum } from '../../generated/prisma/internal/prisma
 import { TimetableService } from './timetable/timetable.service';
 import { AttendanceController } from './attendance/attendance.controller';
 import { AttendanceService } from './attendance/attendance.service';
+import { AssessmentController } from './assessment/assessment.controller';
+import { AssessmentService } from './assessment/assessment.service';
+import { GradeController } from './grade/grade.controller';
+import { GradeService } from './grade/grade.service';
 
 @Module({
   controllers: [
@@ -40,6 +44,8 @@ import { AttendanceService } from './attendance/attendance.service';
     RoomController,
     TimetableController,
     AttendanceController,
+    AssessmentController,
+    GradeController,
   ],
 
   providers: [
@@ -54,6 +60,8 @@ import { AttendanceService } from './attendance/attendance.service';
     RoomService,
     TimetableService,
     AttendanceService,
+    AssessmentService,
+    GradeService,
   ],
 
   exports: [
@@ -68,6 +76,8 @@ import { AttendanceService } from './attendance/attendance.service';
     RoomService,
     TimetableService,
     AttendanceService,
+    AssessmentService,
+    GradeService,
   ],
 })
 export class AcademicModule {}

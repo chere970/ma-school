@@ -8,7 +8,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-import { AttendanceStatus } from '../../../../../generated/prisma/enums';
+import { AttendanceStatus } from '../../../../generated/prisma/enums';
 
 export class BulkAttendanceItemDto {
   @IsString()

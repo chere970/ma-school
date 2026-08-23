@@ -5,7 +5,7 @@ import {
   IsString,
 } from 'class-validator';
 
-import { AttendanceStatus } from '../../../../../generated/prisma/enums';
+import { AttendanceStatus } from '../../../../generated/prisma/enums';
 
 export class CreateAttendanceDto {
   @IsString()
