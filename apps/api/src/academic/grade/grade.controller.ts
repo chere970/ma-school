@@ -49,6 +49,39 @@ export class GradeController {
     });
   }
 
+  // ── Results — MUST be declared before @Get(':id') ─────────────────────────
+  //
+  // NestJS (Express adapter) matches routes in declaration order.
+  // If @Get(':id') comes first, GET /grades/result/x matches ':id'
+  // and these endpoints become permanently unreachable (404).
+
+  /**
+   * GET /grades/result/:enrollmentId
+   *
+   * Returns the weighted course result for a student
+   * enrollment including letter grade, grade point,
+   * and pass/fail status.
+   */
+  @Get('result/:enrollmentId')
+  getCourseResult(
+    @Param('enrollmentId') enrollmentId: string,
+  ) {
+    return this.gradeService.getCourseResult(enrollmentId);
+  }
+
+  /**
+   * GET /grades/student/:enrollmentId
+   *
+   * Returns all visible (published/finalized) grades
+   * for a student's enrollment.
+   */
+  @Get('student/:enrollmentId')
+  getStudentGrades(
+    @Param('enrollmentId') enrollmentId: string,
+  ) {
+    return this.gradeService.getStudentGrades(enrollmentId);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.gradeService.findOne(id);
@@ -106,34 +139,5 @@ export class GradeController {
     @Param('assessmentId') assessmentId: string,
   ) {
     return this.gradeService.finalizeGrades(assessmentId);
-  }
-
-  // ── Results ───────────────────────────────────────────────────────────────
-
-  /**
-   * GET /grades/result/:enrollmentId
-   *
-   * Returns the weighted course result for a student
-   * enrollment including letter grade, grade point,
-   * and pass/fail status.
-   */
-  @Get('result/:enrollmentId')
-  getCourseResult(
-    @Param('enrollmentId') enrollmentId: string,
-  ) {
-    return this.gradeService.getCourseResult(enrollmentId);
-  }
-
-  /**
-   * GET /grades/student/:enrollmentId
-   *
-   * Returns all visible (published/finalized) grades
-   * for a student's enrollment.
-   */
-  @Get('student/:enrollmentId')
-  getStudentGrades(
-    @Param('enrollmentId') enrollmentId: string,
-  ) {
-    return this.gradeService.getStudentGrades(enrollmentId);
   }
 }

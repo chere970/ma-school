@@ -4,6 +4,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  IsUUID,
   Max,
   MaxLength,
   Min,
@@ -12,7 +13,7 @@ import {
 import { AssessmentType } from '../../../../generated/prisma/enums';
 
 export class CreateAssessmentDto {
-  @IsString()
+  @IsUUID('4')
   teachingAssignmentId: string;
 
   @IsString()
@@ -21,6 +22,7 @@ export class CreateAssessmentDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(2000)
   description?: string;
 
   @IsEnum(AssessmentType)

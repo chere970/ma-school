@@ -241,6 +241,17 @@ export class GradeService {
   async update(id: string, dto: UpdateGradeDto) {
     const tenantId = this.getTenantId();
 
+    /*
+     * BUG-04: Reject empty-body updates immediately.
+     * A PATCH with no fields would hit the DB as a no-op
+     * and return 200 with no feedback.
+     */
+    if (dto.score === undefined && dto.remarks === undefined) {
+      throw new BadRequestException(
+        'At least one field (score or remarks) must be provided',
+      );
+    }
+
     const grade = await this.prisma.grade.findFirst({
       where: { id, tenantId },
       include: { assessment: true },
@@ -279,8 +290,10 @@ export class GradeService {
           remarks: dto.remarks,
         }),
         /*
-         * Re-open to DRAFT if a published grade is being
-         * corrected so it needs re-publishing.
+         * Re-open to DRAFT if a published grade's score is
+         * being corrected so it needs re-publishing.
+         * Remarks-only changes do NOT demote status —
+         * remarks are non-scoring annotations.
          */
         ...(dto.score !== undefined &&
           grade.status === GradeStatus.PUBLISHED && {
@@ -391,6 +404,14 @@ export class GradeService {
      */
     const errors: string[] = [];
 
+    /*
+     * BUG-09: Detect duplicate enrollmentIds within the
+     * same request batch BEFORE checking the DB.
+     * Without this, the second create hits the unique
+     * constraint and throws a raw Prisma P2002 error.
+     */
+    const seenInBatch = new Set<string>();
+
     for (const item of dto.grades) {
       const enrollment = enrollmentMap.get(item.enrollmentId);
 
@@ -398,8 +419,18 @@ export class GradeService {
         errors.push(
           `Enrollment ${item.enrollmentId} not found`,
         );
+        seenInBatch.add(item.enrollmentId);
         continue;
       }
+
+      if (seenInBatch.has(item.enrollmentId)) {
+        errors.push(
+          `Duplicate entry for enrollment ${item.enrollmentId} within this request`,
+        );
+        continue;
+      }
+
+      seenInBatch.add(item.enrollmentId);
 
       if (
         enrollment.courseId !==
@@ -505,6 +536,17 @@ export class GradeService {
       data: { status: GradeStatus.PUBLISHED },
     });
 
+    /*
+     * BUG-06: Guard against publishing when no DRAFT grades
+     * exist. updateMany with count=0 is a silent no-op that
+     * would mislead callers into thinking grades are published.
+     */
+    if (result.count === 0) {
+      throw new BadRequestException(
+        'No DRAFT grades exist for this assessment to publish',
+      );
+    }
+
     return {
       message: `${result.count} grade(s) published`,
       count: result.count,
@@ -552,6 +594,17 @@ export class GradeService {
       },
       data: { status: GradeStatus.FINALIZED },
     });
+
+    /*
+     * BUG-07: Guard against finalizing when no PUBLISHED
+     * grades exist. This prevents a silent no-op finalization
+     * that would return count=0 with no error.
+     */
+    if (result.count === 0) {
+      throw new BadRequestException(
+        'No PUBLISHED grades exist for this assessment to finalize',
+      );
+    }
 
     return {
       message: `${result.count} grade(s) finalized`,
@@ -629,9 +682,14 @@ export class GradeService {
         score: g.score,
         maxScore: g.assessment.maxScore,
         weight: g.assessment.weight,
+        /*
+         * Round for display only — the exact value is used
+         * below for the total to avoid cumulative rounding error.
+         */
         percentage: Math.round(percentage * 100) / 100,
         weightedContribution:
           Math.round(weightedContribution * 100) / 100,
+        _exactContribution: weightedContribution,
         status: g.status,
       };
     });
@@ -641,12 +699,28 @@ export class GradeService {
       0,
     );
 
-    const totalCourseScore = gradeBreakdown.reduce(
-      (sum, g) => sum + g.weightedContribution,
+    /*
+     * BUG-03: Sum the EXACT (unrounded) contributions, then
+     * round once at the end.
+     * Summing pre-rounded values introduces cumulative error
+     * that can shift the letter grade at exact boundaries
+     * (e.g. three 33.33% assessments each rounding to 33.33
+     * would sum to 99.99 instead of 100).
+     */
+    const exactTotal = gradeBreakdown.reduce(
+      (sum, g) => sum + g._exactContribution,
       0,
     );
 
-    const roundedScore = Math.round(totalCourseScore * 100) / 100;
+    const roundedScore = Math.round(exactTotal * 100) / 100;
+
+    /*
+     * Strip the internal _exactContribution field before
+     * returning — it is only used for the sum above.
+     */
+    const cleanBreakdown = gradeBreakdown.map(
+      ({ _exactContribution, ...rest }) => rest,
+    );
 
     const { letter, point, passed } =
       computeLetterGrade(roundedScore);
@@ -667,7 +741,7 @@ export class GradeService {
         },
         status: enrollment.status,
       },
-      gradeBreakdown,
+      gradeBreakdown: cleanBreakdown,
       totalWeightCovered:
         Math.round(totalWeightCovered * 100) / 100,
       totalCourseScore: roundedScore,

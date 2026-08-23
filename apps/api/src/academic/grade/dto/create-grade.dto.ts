@@ -2,15 +2,16 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  IsUUID,
   MaxLength,
   Min,
 } from 'class-validator';
 
 export class CreateGradeDto {
-  @IsString()
+  @IsUUID('4')
   assessmentId: string;
 
-  @IsString()
+  @IsUUID('4')
   enrollmentId: string;
 
   /**

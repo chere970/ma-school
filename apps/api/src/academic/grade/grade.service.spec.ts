@@ -243,6 +243,54 @@ describe('GradeService', () => {
       ).rejects.toThrow(BadRequestException);
     });
 
+    it('throws BadRequestException when called with empty body', async () => {
+      prisma.grade.findFirst.mockResolvedValue({
+        ...mockGrade,
+        status: GradeStatus.DRAFT,
+        assessment: mockAssessment,
+      });
+
+      /*
+       * BUG-04: PATCH /grades/:id with no fields should fail
+       * immediately rather than performing a no-op DB write.
+       */
+      await expect(
+        service.update(GRADE_ID, {}),
+      ).rejects.toThrow(BadRequestException);
+
+      expect(prisma.grade.findFirst).not.toHaveBeenCalled();
+    });
+
+    it('remarks-only update does NOT revert PUBLISHED grade to DRAFT', async () => {
+      /*
+       * BUG-05 regression: updating only remarks on a PUBLISHED
+       * grade must NOT demote it back to DRAFT.
+       * Only a score change should cause demotion.
+       */
+      prisma.grade.findFirst.mockResolvedValue({
+        ...mockGrade,
+        status: GradeStatus.PUBLISHED,
+        assessment: mockAssessment,
+      });
+      prisma.grade.update.mockResolvedValue({
+        ...mockGrade,
+        remarks: 'Good effort',
+        status: GradeStatus.PUBLISHED, // status unchanged
+      });
+
+      const result = await service.update(GRADE_ID, {
+        remarks: 'Good effort',
+      });
+
+      expect(prisma.grade.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.not.objectContaining({
+            status: expect.anything(),
+          }),
+        }),
+      );
+    });
+
     it('reverts PUBLISHED grade to DRAFT when score changes', async () => {
       prisma.grade.findFirst.mockResolvedValue({
         ...mockGrade,
@@ -255,7 +303,7 @@ describe('GradeService', () => {
         status: GradeStatus.DRAFT,
       });
 
-      const result = await service.update(GRADE_ID, { score: 80 });
+      await service.update(GRADE_ID, { score: 80 });
 
       expect(prisma.grade.update).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -402,6 +450,34 @@ describe('GradeService', () => {
         service.publishGrades('nonexistent'),
       ).rejects.toThrow(NotFoundException);
     });
+
+    it('throws BadRequestException when no DRAFT grades exist (BUG-06)', async () => {
+      /*
+       * BUG-06 regression: publishing when there are no DRAFT
+       * grades must fail rather than silently returning count=0.
+       */
+      prisma.assessment.findFirst.mockResolvedValue(mockAssessment);
+      prisma.assessment.findMany.mockResolvedValue([
+        { weight: 100 }, // valid weight
+      ]);
+      prisma.grade.updateMany.mockResolvedValue({ count: 0 });
+
+      await expect(
+        service.publishGrades(ASSESSMENT_ID),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('returns count when DRAFT grades are successfully published', async () => {
+      prisma.assessment.findFirst.mockResolvedValue(mockAssessment);
+      prisma.assessment.findMany.mockResolvedValue([
+        { weight: 100 },
+      ]);
+      prisma.grade.updateMany.mockResolvedValue({ count: 3 });
+
+      const result = await service.publishGrades(ASSESSMENT_ID);
+
+      expect(result.count).toBe(3);
+    });
   });
 
   // ── finalizeGrades ───────────────────────────────────────────────────────
@@ -514,6 +590,96 @@ describe('GradeService', () => {
           grades: [{ enrollmentId: ENROLLMENT_ID, score: 80 }],
         }),
       ).rejects.toThrow(NotFoundException);
+    });
+
+    it('throws BadRequestException for intra-batch duplicate enrollmentId (BUG-09)', async () => {
+      /*
+       * BUG-09 regression: two items in the same request
+       * with the same enrollmentId must be caught before
+       * hitting the DB (which would throw a raw Prisma P2002).
+       */
+      prisma.assessment.findFirst.mockResolvedValue(mockAssessment);
+      prisma.enrollment.findMany.mockResolvedValue([
+        { id: ENROLLMENT_ID, courseId: COURSE_ID, studentId: 'student-111' },
+      ]);
+      prisma.grade.findMany.mockResolvedValue([]);
+
+      await expect(
+        service.bulkCreate({
+          assessmentId: ASSESSMENT_ID,
+          grades: [
+            { enrollmentId: ENROLLMENT_ID, score: 80 },
+            { enrollmentId: ENROLLMENT_ID, score: 85 }, // duplicate
+          ],
+        }),
+      ).rejects.toThrow(BadRequestException);
+
+      expect(prisma.$transaction).not.toHaveBeenCalled();
+    });
+  });
+
+  // ── getCourseResult — rounding boundary ──────────────────────────────────
+
+  describe('getCourseResult rounding (BUG-03)', () => {
+    it('does not accumulate rounding error across equal-weight assessments', async () => {
+      /*
+       * BUG-03 regression: three assessments each with weight
+       * 33.33... would each round their contribution to 33.33,
+       * summing to 99.99 instead of 100.
+       * The fix computes the total from exact values.
+       *
+       * Setup: 3 assessments at 100% score, weights summing
+       * to 100 via floating-point thirds.
+       */
+      prisma.enrollment.findFirst.mockResolvedValue(mockEnrollment);
+      prisma.grade.findMany.mockResolvedValue([
+        {
+          score: 10,
+          status: GradeStatus.FINALIZED,
+          assessment: {
+            id: '1',
+            title: 'A',
+            type: AssessmentType.QUIZ,
+            maxScore: 10,
+            weight: 100 / 3,    // 33.333...
+            isActive: true,
+          },
+        },
+        {
+          score: 10,
+          status: GradeStatus.FINALIZED,
+          assessment: {
+            id: '2',
+            title: 'B',
+            type: AssessmentType.ASSIGNMENT,
+            maxScore: 10,
+            weight: 100 / 3,    // 33.333...
+            isActive: true,
+          },
+        },
+        {
+          score: 10,
+          status: GradeStatus.FINALIZED,
+          assessment: {
+            id: '3',
+            title: 'C',
+            type: AssessmentType.FINAL,
+            maxScore: 10,
+            weight: 100 / 3,    // 33.333...
+            isActive: true,
+          },
+        },
+      ]);
+
+      const result = await service.getCourseResult(ENROLLMENT_ID);
+
+      /*
+       * 3 × (100% × 33.333.../100) = 100 exactly.
+       * After rounding to 2dp this must be 100.00, not 99.99.
+       */
+      expect(result.totalCourseScore).toBe(100);
+      expect(result.letterGrade).toBe('A');
+      expect(result.passed).toBe(true);
     });
   });
 });

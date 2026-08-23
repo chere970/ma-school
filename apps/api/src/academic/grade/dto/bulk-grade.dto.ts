@@ -1,8 +1,10 @@
 import {
+  ArrayMinSize,
   IsArray,
   IsNumber,
   IsOptional,
   IsString,
+  IsUUID,
   MaxLength,
   Min,
   ValidateNested,
@@ -10,7 +12,7 @@ import {
 import { Type } from 'class-transformer';
 
 export class BulkGradeItemDto {
-  @IsString()
+  @IsUUID('4')
   enrollmentId: string;
 
   /**
@@ -31,10 +33,15 @@ export class BulkGradeDto {
   /**
    * All grades in this batch belong to this assessment.
    */
-  @IsString()
+  @IsUUID('4')
   assessmentId: string;
 
+  /**
+   * Must contain at least one entry — an empty bulk
+   * request is meaningless and would be a silent no-op.
+   */
   @IsArray()
+  @ArrayMinSize(1)
   @ValidateNested({ each: true })
   @Type(() => BulkGradeItemDto)
   grades: BulkGradeItemDto[];

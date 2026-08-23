@@ -49,6 +49,25 @@ export class AssessmentController {
     });
   }
 
+  /**
+   * GET /assessments/weights/:teachingAssignmentId
+   *
+   * Returns total active weight and whether it
+   * sums to 100% — use before publishing grades.
+   *
+   * IMPORTANT: must be declared before @Get(':id') so NestJS
+   * does not treat 'weights' as a dynamic :id segment.
+   */
+  @Get('weights/:teachingAssignmentId')
+  validateWeights(
+    @Param('teachingAssignmentId')
+    teachingAssignmentId: string,
+  ) {
+    return this.assessmentService.validateWeights(
+      teachingAssignmentId,
+    );
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.assessmentService.findOne(id);
@@ -65,21 +84,5 @@ export class AssessmentController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.assessmentService.remove(id);
-  }
-
-  /**
-   * GET /assessments/weights/:teachingAssignmentId
-   *
-   * Returns total active weight and whether it
-   * sums to 100% — use before publishing grades.
-   */
-  @Get('weights/:teachingAssignmentId')
-  validateWeights(
-    @Param('teachingAssignmentId')
-    teachingAssignmentId: string,
-  ) {
-    return this.assessmentService.validateWeights(
-      teachingAssignmentId,
-    );
   }
 }
