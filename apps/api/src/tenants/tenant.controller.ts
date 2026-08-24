@@ -10,6 +10,8 @@ export class TenantController {
     constructor(private readonly tenantService: TenantService,
 
     ){}
+    @UseGuards(JwtAuthGuard)
+    @UseInterceptors(TenantContextInterceptor)
     @Get('current')
     async getCurrentTenant() {
         return this.tenantService.getCurrentTenant();

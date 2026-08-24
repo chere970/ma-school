@@ -11,7 +11,10 @@ export class TenantService {
   ) {}
 
   async getCurrentTenant() {
-    const tenantId = this.tenantContext.getTenantId();
+    const tenantId = this.tenantContext.getTenantIdOptional();
+    if (!tenantId) {
+      return null;
+    }
 
     return this.prisma.tenant.findUnique({
       where: {
