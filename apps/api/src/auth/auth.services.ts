@@ -197,10 +197,10 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, password: string) {
-    const tenantId = await this.tenantContext.getTenantId();
+    const tenantId = this.tenantContext.getTenantIdOptional();
     const user = await this.prisma.user.findFirst({
       where: {
-        tenantId,
+        ...(tenantId ? { tenantId } : {}),
         email,
         isActive: true,
       },

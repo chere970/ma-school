@@ -25,6 +25,10 @@ export class TenantContext {
     return store.tenantId;
   }
 
+  getTenantIdOptional(): string | undefined {
+    return this.storage.getStore()?.tenantId;
+  }
+
   getUserId() {
     return this.storage.getStore()?.userId;
   }
