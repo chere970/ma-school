@@ -3,6 +3,8 @@
   "private": true,
   "scripts": {
     "dev:web": "pnpm --filter web dev",
-    "dev:api": "pnpm --filter api start:dev"
+    "dev:api": "pnpm --filter api start:dev",
+    "build:api": "pnpm --filter api run build",
+    "build:web": "pnpm --filter web run build"
   }
 }
