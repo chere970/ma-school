@@ -87,6 +87,7 @@ model Tenant {
   attendance          Attendance[]
   assessments         Assessment[]
   grades              Grade[]
+  studentResults        StudentResult[]
 }
 
 model Permission {
@@ -235,6 +236,7 @@ model Student {
 
   studentEnrollments Enrollment[]
   attendances        Attendance[]
+  studentResults     StudentResult[]
 
   @@unique([tenantId, studentNumber])
   @@unique([tenantId, email])
@@ -461,6 +463,7 @@ model Assessment {
   updatedAt DateTime @updatedAt
 
   grades Grade[]
+  studentResult StudentResult[]
 
   @@unique([tenantId, teachingAssignmentId, title])
   @@index([tenantId])
@@ -493,4 +496,31 @@ model Grade {
   @@index([assessmentId])
   @@index([enrollmentId])
   @@index([tenantId, status])
+}
+model StudentResult {
+  id String @id @default(uuid())
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  assessmentId String
+  assessment   Assessment @relation(fields: [assessmentId], references: [id])
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id])
+
+  score Decimal @db.Decimal(5, 2)
+
+  grade      String?
+  gradePoint Decimal? @db.Decimal(4, 2)
+
+  remark String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, assessmentId, studentId])
+  @@index([tenantId])
+  @@index([assessmentId])
+  @@index([studentId])
 }
