@@ -1,98 +1,167 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 🔌 CampusCore ERP — Backend API (`apps/api`)
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+> **NestJS 11 Multi-Tenant RESTful API Service & Prisma Database Layer for CampusCore ERP.**
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+[![NestJS](https://img.shields.io/badge/NestJS-v11-E0234E?style=flat-square&logo=nestjs&logoColor=white)](https://nestjs.com/)
+[![Prisma](https://img.shields.io/badge/Prisma-v7.9-2D3748?style=flat-square&logo=prisma&logoColor=white)](https://www.prisma.io/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-v16+-4169E1?style=flat-square&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-v5.7-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Jest](https://img.shields.io/badge/Jest-v30-C21325?style=flat-square&logo=jest&logoColor=white)](https://jestjs.io/)
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 📖 Overview
 
-## Project setup
+The `apps/api` package is the core backend engine of CampusCore ERP. Built with **NestJS 11** and **Prisma ORM 7**, it enforces strict multi-tenant data partitioning (`tenantId`), provides JWT authentication with refresh tokens, implements Role-Based Access Control (RBAC), and exposes REST endpoints for all institutional and academic operations.
 
-```bash
-$ pnpm install
+---
+
+## 🛠️ Tech Stack
+
+- **Framework**: [NestJS v11](https://nestjs.com/)
+- **ORM & Client**: [Prisma ORM v7.9](https://www.prisma.io/) with PostgreSQL adapter (`@prisma/adapter-pg`)
+- **Database**: PostgreSQL 16+
+- **Authentication**: `passport-jwt`, `@nestjs/jwt`, `bcrypt` for password hashing & refresh tokens
+- **Validation**: `class-validator`, `class-transformer`, `joi`
+- **Testing**: Jest, Supertest, `ts-jest`
+- **Execution & Tooling**: `tsx`, `ts-node`, Nest CLI
+
+---
+
+## 📂 Folder Structure
+
+```text
+apps/api/
+├── prisma/                      # Database Schema & Seed Engine
+│   ├── migrations/              # PostgreSQL Migration History
+│   ├── schema.prisma            # Multi-Tenant Data Schema & Model Definitions
+│   └── seed.ts                  # Database Seeder (Demo Tenants, Users, Campuses)
+├── src/
+│   ├── academic/                # Academic Core & Operational Modules
+│   │   ├── campus/              # Campus CRUD & Management
+│   │   ├── department/          # Faculty & Department Management
+│   │   ├── program/             # Degree Program Management
+│   │   ├── course/              # Course Catalog Management
+│   │   ├── student/             # Student Directory & Records
+│   │   ├── teacher/             # Faculty Member Directory
+│   │   ├── enrollment/          # Student Course Registrations
+│   │   ├── teaching-assignment/ # Teacher-to-Course Assignments
+│   │   ├── room/                # Campus Facilities & Classroom Allocation
+│   │   ├── timetable/           # Class Schedule & Timetables
+│   │   ├── attendance/          # Daily/Session Attendance Tracking
+│   │   ├── assessment/          # Weighted Course Assessments (Exams, Quizzes)
+│   │   ├── grade/               # Score Entry & Assessment Grading
+│   │   └── student-result/      # Final Grade Evaluation & Point Calculation
+│   ├── auth/                    # Auth Module (JWT, Passport, Refresh Tokens)
+│   ├── tenants/                 # Tenant Management & Resolution
+│   ├── common/                  # Shared Guards, Interceptors, Decorators, Filters
+│   │   ├── decorators/          # CurrentUser, CurrentTenant, Roles decorators
+│   │   ├── guards/              # JwtAuthGuard, RolesGuard, TenantGuard
+│   │   └── prisma/              # PrismaService Database Context
+│   ├── config/                  # Environment Configuration & Validation
+│   ├── app.module.ts            # Root Application Module
+│   └── main.ts                  # NestJS Application Entry Point
+├── test/                        # E2E Integration Tests
+├── nest-cli.json
+├── package.json
+└── tsconfig.json
 ```
 
-## Compile and run the project
+---
 
-```bash
-# development
-$ pnpm run start
+## 🧩 API Modules Overview
 
-# watch mode
-$ pnpm run start:dev
+### 🔑 Authentication (`src/auth`)
+- **`POST /auth/register`**: Register new user within a tenant.
+- **`POST /auth/login`**: Authenticate credentials and receive access + refresh JWTs.
+- **`POST /auth/refresh`**: Generate a new access token using a valid refresh token.
+- **`GET /auth/me`**: Retrieve current user profile and tenant scope.
 
-# production mode
-$ pnpm run start:prod
+### 🏢 Tenants (`src/tenants`)
+- **`GET /tenants`**: List all active institutions/tenants.
+- **`POST /tenants`**: Provision a new university/tenant account.
+- **`GET /tenants/:id`**: Fetch tenant details and domain configurations.
+
+### 🎓 Academic Core (`src/academic/*`)
+- **Campus & Facilities**: Manage multi-campus structures and room capacities.
+- **Departments & Programs**: Configure academic departments and degree requirements.
+- **Course Catalog**: Define credit hours, semester levels, and department affiliations.
+- **Student & Faculty Directories**: Manage student profiles, employee numbers, and contact details.
+
+### ⚙️ Academic Operations (`src/academic/*`)
+- **Enrollments**: Enroll students into courses with status tracking (`ACTIVE`, `COMPLETED`, `DROPPED`).
+- **Teaching Assignments**: Assign instructors to specific courses.
+- **Timetabling**: Configure room schedules, day-of-week slots, and class times.
+- **Attendance**: Log student attendance (`PRESENT`, `ABSENT`, `LATE`, `EXCUSED`).
+- **Assessments & Grades**: Create weighted assessments and enter student scores.
+- **Student Results**: Calculate weighted final scores, letter grades, and grade points.
+
+---
+
+## 🚀 Local Development & Setup
+
+### 1. Environment Variables Setup
+Ensure `apps/api/.env` exists and contains valid database credentials:
+
+```ini
+NODE_ENV=development
+APP_NAME="CampusCore ERP"
+PORT=3000
+
+# PostgreSQL Database Connection
+DATABASE_URL="postgresql://postgres:password@localhost:5432/campuscore?schema=public"
+
+# JWT Token Secrets
+JWT_ACCESS_SECRET=access-secret-change-this_
+JWT_REFRESH_SECRET=refresh-secret-change-this_
+JWT_EXPIRES_IN=1d
+JWT_REFRESH_EXPIRES_IN=7d
 ```
 
-## Run tests
+### 2. Run Database Migrations & Generation
+From the root monorepo or `apps/api` directory:
 
 ```bash
-# unit tests
-$ pnpm run test
+# Generate Prisma Client (outputted to generated/prisma & node_modules)
+pnpm --filter api exec prisma generate
 
-# e2e tests
-$ pnpm run test:e2e
+# Apply Database Migrations
+pnpm --filter api exec prisma migrate dev
 
-# test coverage
-$ pnpm run test:cov
+# Seed Demo Data (Tenants, Admin User, Campuses, Departments, Courses)
+pnpm --filter api run prisma:seed
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### 3. Start Development Server
 
 ```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+# From monorepo root
+pnpm run dev:api
+
+# Or inside apps/api
+pnpm run start:dev
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+The API service will start on **`http://localhost:3000`**.
 
-## Resources
+---
 
-Check out a few resources that may come in handy when working with NestJS:
+## 📜 Available NPM Scripts
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+| Command | Description |
+| :--- | :--- |
+| `pnpm run start:dev` | Start NestJS in watch mode for development |
+| `pnpm run build` | Generate Prisma client and compile TypeScript to `dist/` |
+| `pnpm run start:prod` | Run the compiled production build (`node dist/src/main.js`) |
+| `pnpm run prisma:seed` | Seed database using `prisma/seed.ts` |
+| `pnpm run test` | Run unit tests using Jest |
+| `pnpm run test:watch` | Run unit tests in watch mode |
+| `pnpm run test:cov` | Generate test coverage report |
+| `pnpm run test:e2e` | Run end-to-end API integration tests |
+| `pnpm run lint` | Execute ESLint auto-fixer |
 
-## Support
+---
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## 🔒 Tenant Isolation Policy
 
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Every database entity linked to an institution implements a `tenantId String` column. Backend queries are automatically filtered by `tenantId` extracted from authenticated JWT tokens or tenant headers, guaranteeing strict tenant data isolation.
