@@ -32,9 +32,10 @@ import { GradeController } from './grade/grade.controller';
 import { GradeService } from './grade/grade.service';
 
 import { StudentResultModule } from './student-result/student-result.module';
+import { ResultReportModule } from './result-report/result-report.module';
 
 @Module({
-  imports: [StudentResultModule],
+  imports: [StudentResultModule, ResultReportModule],
   controllers: [
     CampusController,
     DepartmentController,
@@ -82,6 +83,7 @@ import { StudentResultModule } from './student-result/student-result.module';
     AssessmentService,
     GradeService,
     StudentResultModule,
+    ResultReportModule,
   ],
 })
 export class AcademicModule {}
