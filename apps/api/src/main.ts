@@ -33,11 +33,13 @@ async function bootstrap() {
       },
       'access-token',
     )
-    .addApiHeader({
+    .addGlobalParameters({
       name: 'x-tenant-id',
+      in: 'header',
       description:
-        'Tenant ID. Required for public tenant-scoped endpoints; optional for authenticated endpoints.',
+        'Tenant slug/ID. Required for public tenant-scoped endpoints; optional for authenticated endpoints (tenant is derived from JWT).',
       required: false,
+      schema: { type: 'string' },
     })
     .build();
 
