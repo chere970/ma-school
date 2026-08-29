@@ -158,7 +158,12 @@ export class AcademicResultService {
     let totalQualityPoints = 0;
     let totalCreditHours = 0;
 
-    const courses = [];
+    const courses: {
+      enrollmentId: string;
+      course: { id: string; code: string; name: string; creditHours: number };
+      percentage: number;
+      gradePoint: number;
+    }[] = [];
 
     for (const enrollment of enrollments) {
       if (enrollment.grades.length === 0) {
@@ -225,20 +230,27 @@ export class AcademicResultService {
     };
   }
 
-  private calculateGradePoint(
-    percentage: number,
-  ): number {
+  /**
+   * Maps a percentage to a GPA point using the project-wide 7-band scale
+   * (same as GradeService and StudentResultService).
+   *
+   * | %    | Letter | GPA |
+   * |------|--------|-----|
+   * | ≥ 90 | A      | 4.0 |
+   * | ≥ 85 | B+     | 3.5 |
+   * | ≥ 80 | B      | 3.0 |
+   * | ≥ 75 | C+     | 2.5 |
+   * | ≥ 70 | C      | 2.0 |
+   * | ≥ 60 | D      | 1.0 |
+   * | < 60 | F      | 0.0 |
+   */
+  private calculateGradePoint(percentage: number): number {
     if (percentage >= 90) return 4.0;
-    if (percentage >= 85) return 4.0;
-    if (percentage >= 80) return 3.75;
-    if (percentage >= 75) return 3.5;
-    if (percentage >= 70) return 3.0;
-    if (percentage >= 65) return 2.75;
-    if (percentage >= 60) return 2.5;
-    if (percentage >= 50) return 2.0;
-    if (percentage >= 45) return 1.75;
-    if (percentage >= 40) return 1.0;
-
-    return 0;
+    if (percentage >= 85) return 3.5;
+    if (percentage >= 80) return 3.0;
+    if (percentage >= 75) return 2.5;
+    if (percentage >= 70) return 2.0;
+    if (percentage >= 60) return 1.0;
+    return 0.0;
   }
 }
