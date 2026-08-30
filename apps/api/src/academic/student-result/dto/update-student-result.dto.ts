@@ -5,18 +5,30 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateStudentResultDto {
-  /**
-   * Updated raw score — optional.
-   * When provided, grade and gradePoint are recalculated.
-   * Stored as Decimal(5,2); more than 2 decimal places are rejected.
-   */
+  @ApiPropertyOptional({
+    description:
+      'Updated raw score. Grade and grade point are recalculated automatically.',
+    example: 90.25,
+    minimum: 0,
+    maximum: 100,
+  })
   @IsOptional()
-  @IsNumber({ allowNaN: false, allowInfinity: false, maxDecimalPlaces: 2 })
+  @IsNumber({
+    allowNaN: false,
+    allowInfinity: false,
+    maxDecimalPlaces: 2,
+  })
   @Min(0)
   score?: number;
 
+  @ApiPropertyOptional({
+    description: 'Updated remark',
+    example: 'Very good performance',
+    maxLength: 500,
+  })
   @IsOptional()
   @IsString()
   @MaxLength(500)
