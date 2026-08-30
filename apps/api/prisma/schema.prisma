@@ -87,7 +87,9 @@ model Tenant {
   attendance          Attendance[]
   assessments         Assessment[]
   grades              Grade[]
-  studentResults        StudentResult[]
+  studentResults      StudentResult[]
+  academicYears       AcademicYear[]
+  academicSemesters   AcademicSemester[]
 }
 
 model Permission {
@@ -390,6 +392,7 @@ model Timetable {
   @@index([roomId])
   @@index([tenantId, dayOfWeek])
 }
+
 model Attendance {
   id String @id @default(uuid())
 
@@ -400,7 +403,7 @@ model Attendance {
   student   Student @relation(fields: [studentId], references: [id])
 
   teachingAssignmentId String
-  teachingAssignment   TeachingAssignment @relation( fields: [teachingAssignmentId],references: [id])
+  teachingAssignment   TeachingAssignment @relation(fields: [teachingAssignmentId], references: [id])
 
   date DateTime
 
@@ -411,8 +414,7 @@ model Attendance {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([tenantId,studentId,teachingAssignmentId,date])
-
+  @@unique([tenantId, studentId, teachingAssignmentId, date])
   @@index([tenantId])
   @@index([studentId])
   @@index([teachingAssignmentId])
@@ -443,7 +445,7 @@ enum GradeStatus {
 }
 
 model Assessment {
-  id       String @id @default(uuid())
+  id String @id @default(uuid())
 
   tenantId String
   tenant   Tenant @relation(fields: [tenantId], references: [id])
@@ -457,12 +459,12 @@ model Assessment {
   maxScore       Float
   weight         Float
   assessmentDate DateTime?
-  isActive       Boolean @default(true)
+  isActive       Boolean        @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  grades Grade[]
+  grades        Grade[]
   studentResult StudentResult[]
 
   @@unique([tenantId, teachingAssignmentId, title])
@@ -473,7 +475,7 @@ model Assessment {
 }
 
 model Grade {
-  id       String @id @default(uuid())
+  id String @id @default(uuid())
 
   tenantId String
   tenant   Tenant @relation(fields: [tenantId], references: [id])
@@ -497,6 +499,7 @@ model Grade {
   @@index([enrollmentId])
   @@index([tenantId, status])
 }
+
 model StudentResult {
   id String @id @default(uuid())
 
@@ -523,4 +526,50 @@ model StudentResult {
   @@index([tenantId])
   @@index([assessmentId])
   @@index([studentId])
+}
+
+model AcademicYear {
+  id String @id @default(uuid())
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  name      String
+  startDate DateTime
+  endDate   DateTime
+
+  isActive Boolean @default(true)
+
+  semesters AcademicSemester[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+}
+
+model AcademicSemester {
+  id String @id @default(uuid())
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  academicYearId String
+  academicYear   AcademicYear @relation(fields: [academicYearId], references: [id])
+
+  name      String
+  number    Int
+  startDate DateTime
+  endDate   DateTime
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, academicYearId, number])
+  @@unique([tenantId, academicYearId, name])
+  @@index([tenantId])
+  @@index([academicYearId])
 }
