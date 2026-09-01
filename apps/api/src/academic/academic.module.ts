@@ -37,6 +37,8 @@ import { AcademicYearController } from './academic-year/academic-year.controller
 import { AcademicYearService } from './academic-year/academic-year.service';
 import { AcademicSemesterController } from './academic-semester/academic-semester.controller';
 import { AcademicSemesterService } from './academic-semester/academic-semester.service';
+import { AcademicPeriodService } from './academic-period/academic-period.service';
+import { AcademicPeriodController } from './academic-period/academic-period.controller';
 @Module({
   imports: [StudentResultModule, ResultReportModule],
   controllers: [
@@ -55,6 +57,7 @@ import { AcademicSemesterService } from './academic-semester/academic-semester.s
     GradeController,
     AcademicYearController,
     AcademicSemesterController,
+    AcademicPeriodController,
   ],
 
   providers: [
@@ -73,6 +76,9 @@ import { AcademicSemesterService } from './academic-semester/academic-semester.s
     GradeService,
     AcademicYearService,
     AcademicSemesterService,
+    AcademicPeriodService,
+
+    
   ],
 
   exports: [
@@ -93,6 +99,7 @@ import { AcademicSemesterService } from './academic-semester/academic-semester.s
     ResultReportModule,
     AcademicYearService,
     AcademicSemesterService,
+    AcademicPeriodService,
   ],
 })
 export class AcademicModule {}
