@@ -1,4 +1,4 @@
-import { IsInt, IsOptional, IsString, Matches, Max, Min } from 'class-validator';
+import { IsBoolean, IsInt, IsOptional, IsString, Matches, Max, Min } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateTimetableDto {
@@ -34,4 +34,9 @@ export class UpdateTimetableDto {
     message: 'endTime must use HH:mm format',
   })
   endTime?: string;
+
+  @ApiPropertyOptional({ example: true, description: 'Whether this timetable entry is currently active' })
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
 }

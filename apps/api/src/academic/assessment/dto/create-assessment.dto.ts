@@ -28,7 +28,7 @@ export class CreateAssessmentDto {
   @MaxLength(2000)
   description?: string;
 
-  @ApiProperty({ enum: AssessmentType, example: AssessmentType.EXAM, description: 'Type of assessment' })
+  @ApiProperty({ enum: AssessmentType, example: AssessmentType.MIDTERM, description: 'Type of assessment' })
   @IsEnum(AssessmentType)
   type: AssessmentType;
 
