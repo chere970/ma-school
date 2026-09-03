@@ -10,19 +10,23 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class BulkGradeItemDto {
+  @ApiProperty({ example: 'clx1a2b3c0000...', description: 'UUID of the enrollment (student + course) being graded' })
   @IsUUID('4')
   enrollmentId: string;
 
-  /**
-   * Raw score — upper bound validated against
-   * assessment.maxScore in the service layer.
-   */
+  @ApiProperty({
+    example: 78.5,
+    description: 'Raw score. Upper bound validated against assessment.maxScore at service level.',
+    minimum: 0,
+  })
   @IsNumber()
   @Min(0)
   score: number;
 
+  @ApiPropertyOptional({ example: 'Good effort.', description: 'Optional remarks for this grade entry', maxLength: 500 })
   @IsOptional()
   @IsString()
   @MaxLength(500)
@@ -30,16 +34,14 @@ export class BulkGradeItemDto {
 }
 
 export class BulkGradeDto {
-  /**
-   * All grades in this batch belong to this assessment.
-   */
+  @ApiProperty({ example: 'clx1a2b3c0001...', description: 'UUID of the assessment — all grades in this batch belong to this assessment' })
   @IsUUID('4')
   assessmentId: string;
 
-  /**
-   * Must contain at least one entry — an empty bulk
-   * request is meaningless and would be a silent no-op.
-   */
+  @ApiProperty({
+    type: [BulkGradeItemDto],
+    description: 'Array of grade entries. Must contain at least one item.',
+  })
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })

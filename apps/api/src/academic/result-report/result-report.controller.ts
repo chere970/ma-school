@@ -6,12 +6,15 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { TenantContextInterceptor } from '../../common/tenant/tenant-context.interceptor';
 
 import { ResultReportService } from './result-report.service';
 
+@ApiTags('Result Reports')
+@ApiBearerAuth('access-token')
 @Controller('result-reports')
 @UseGuards(JwtAuthGuard)
 @UseInterceptors(TenantContextInterceptor)
@@ -20,30 +23,20 @@ export class ResultReportController {
     private readonly resultReportService: ResultReportService,
   ) {}
 
-  /**
-   * GET /result-reports/students/:studentId/transcript
-   *
-   * Declared BEFORE the generic :studentId route so NestJS (Express adapter)
-   * does not match 'transcript' as the dynamic :studentId segment.
-   *
-   * Transcript-style summary — one row per course with final grade.
-   */
   @Get('students/:studentId/transcript')
+  @ApiOperation({ summary: 'Generate a transcript-style report for a student — one row per course with final letter grade' })
+  @ApiResponse({ status: 200, description: 'Returns the student transcript.' })
+  @ApiResponse({ status: 404, description: 'Student not found.' })
   getStudentTranscript(@Param('studentId') studentId: string) {
     return this.resultReportService.getStudentTranscript(studentId);
   }
 
-  /**
-   * GET /result-reports/students/:studentId
-   *
-   * Full academic summary for one student including per-assessment
-   * results and computed weighted final grades.
-   *
-   * Optional filters:
-   *   ?semester=1   — only courses in this semester
-   *   ?yearLevel=2  — only courses at this year level
-   */
   @Get('students/:studentId')
+  @ApiOperation({ summary: 'Get a full academic report for a student including per-assessment results and weighted final grades' })
+  @ApiQuery({ name: 'semester', required: false, type: Number, description: 'Filter results by semester number' })
+  @ApiQuery({ name: 'yearLevel', required: false, type: Number, description: 'Filter results by year level' })
+  @ApiResponse({ status: 200, description: 'Returns the full student academic report.' })
+  @ApiResponse({ status: 404, description: 'Student not found.' })
   getStudentReport(
     @Param('studentId') studentId: string,
     @Query('semester') semester?: string,
@@ -55,22 +48,18 @@ export class ResultReportController {
     });
   }
 
-  /**
-   * GET /result-reports/courses/:courseId
-   *
-   * Course-level report with all enrolled students and their results.
-   */
   @Get('courses/:courseId')
+  @ApiOperation({ summary: 'Get a course-level report showing all enrolled students and their results' })
+  @ApiResponse({ status: 200, description: 'Returns the course report.' })
+  @ApiResponse({ status: 404, description: 'Course not found.' })
   getCourseReport(@Param('courseId') courseId: string) {
     return this.resultReportService.getCourseReport(courseId);
   }
 
-  /**
-   * GET /result-reports/assessments/:assessmentId
-   *
-   * Assessment-level statistics and per-student result breakdown.
-   */
   @Get('assessments/:assessmentId')
+  @ApiOperation({ summary: 'Get assessment-level statistics and per-student result breakdown' })
+  @ApiResponse({ status: 200, description: 'Returns the assessment report with statistics.' })
+  @ApiResponse({ status: 404, description: 'Assessment not found.' })
   getAssessmentReport(@Param('assessmentId') assessmentId: string) {
     return this.resultReportService.getAssessmentReport(assessmentId);
   }
