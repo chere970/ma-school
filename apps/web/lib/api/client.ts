@@ -1,6 +1,6 @@
 import { ApiError } from '@/types/api';
 
-const API_URL = process.env.API_URL || 'https://ma-school.onrender.com';
+const API_URL = process.env.NEXT_PUBLIC_API_URL|| 'https://ma-school.onrender.com';
 
 export class ApiClientError extends Error {
   statusCode: number;
